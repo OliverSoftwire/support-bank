@@ -1,12 +1,12 @@
 import * as fs from "fs";
 import { parse } from "csv-parse/sync";
 import lodash from "lodash";
-import moment from "moment";
 
 import { Table } from "console-table-printer";
 
 import Account from "./Account.js";
 import { formatBalance } from "./utils.js";
+import Transaction from "./Transaction.js";
 
 export default class Bank {
 	constructor() {
@@ -42,21 +42,19 @@ export default class Bank {
 		const data = fs.readFileSync(path);
 		this.transactions = parse(data, {
 			columns: true,
-			skip_empty_lines: true,
-			cast: true
-		});
+			skip_empty_lines: true
+		}).map(transaction => new Transaction(transaction));
 
 		const names = this.transactions
-			.map(({ From }) => From)
-			.concat(this.transactions.map(({ To }) => To));
+			.map(({ from }) => from)
+			.concat(this.transactions.map(({ to }) => to));
 
 		const uniqueNames = lodash.uniq(names);
 		uniqueNames.forEach(name => this.createAccount(name));
 
 		this.transactions.forEach(transaction => {
-			transaction.Date = moment(transaction.Date, "DD/MM/YYYY");
-			this.getAccount(transaction.From).processTransaction(transaction);
-			this.getAccount(transaction.To).processTransaction(transaction);
+			this.getAccount(transaction.from).processTransaction(transaction);
+			this.getAccount(transaction.to).processTransaction(transaction);
 		});
 	}
 

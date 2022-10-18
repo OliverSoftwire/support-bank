@@ -2,7 +2,7 @@ import readlineSync from "readline-sync";
 import Bank from "./src/Bank.js";
 
 const bank = new Bank();
-bank.parseTransactions("Transactions2014.csv");
+bank.parseTransactions("DodgyTransactions2015.csv");
 
 console.log("Welcome to Support Bank");
 console.log("Use 'help' to see available commands");

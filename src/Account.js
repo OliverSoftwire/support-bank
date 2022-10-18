@@ -10,14 +10,14 @@ export default class Account {
 	}
 
 	processTransaction(transaction) {
-		if (transaction.From === this.name) {
-			this.balance -= transaction.Amount;
+		if (transaction.from === this.name) {
+			this.balance -= transaction.amount;
 			this.transactions.push(transaction);
 			return;
 		}
 
-		if (transaction.To === this.name) {
-			this.balance += transaction.Amount;
+		if (transaction.to === this.name) {
+			this.balance += transaction.amount;
 			this.transactions.push(transaction);
 			return;
 		}
@@ -29,28 +29,28 @@ export default class Account {
 		const table = new Table({
 			title: `${this.name} | Balance: ${formatBalance(this.balance)}`,
 			enabledColumns: ["date-formatted", "Payee", "Reference", "Debit", "Credit"],
-			sort: (row1, row2) => row1.Date.valueOf() - row2.Date.valueOf(),
+			sort: (row1, row2) => row1.date.valueOf() - row2.date.valueOf(),
 			computedColumns: [
 				{
 					name: "date-formatted",
 					title: "Date",
-					function: (row) => row.Date.format("YYYY-MM-DD")
+					function: (row) => row.date.format("YYYY-MM-DD")
 				},
 				{
 					name: "Payee",
-					function: (row) => row.From === this.name ? row.To : row.From
+					function: (row) => row.from === this.name ? row.to : row.from
 				},
 				{
 					name: "Reference",
-					function: (row) => row.Narrative
+					function: (row) => row.reference
 				},
 				{
 					name: "Debit",
-					function: (row) => row.From === this.name ? chalk.red(formatCurrency(row.Amount)) : ""
+					function: (row) => row.from === this.name ? chalk.red(formatCurrency(row.amount)) : ""
 				},
 				{
 					name: "Credit",
-					function: (row) => row.From === this.name ? "" : chalk.green(formatCurrency(row.Amount))
+					function: (row) => row.from === this.name ? "" : chalk.green(formatCurrency(row.amount))
 				}
 			]
 		});
