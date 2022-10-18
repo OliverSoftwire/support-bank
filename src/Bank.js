@@ -55,7 +55,6 @@ export default class Bank {
 
 		this.transactions.forEach(transaction => {
 			transaction.Date = moment(transaction.Date, "DD/MM/YYYY");
-			console.log(transaction.Date);
 			this.getAccount(transaction.From).processTransaction(transaction);
 			this.getAccount(transaction.To).processTransaction(transaction);
 		});
