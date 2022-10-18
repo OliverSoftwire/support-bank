@@ -1,11 +1,15 @@
 import moment from "moment";
 import log4js from "log4js";
 
-const logger = log4js.getLogger("Transaction");
+import { TransactionError } from "./Errors.js";
+
+const logger = log4js.getLogger("src/Transaction.js");
 
 export default class Transaction {
-	constructor({ Date, From, To, Narrative, Amount }) {
+	constructor({ Date, From, To, Narrative, Amount }, index) {
 		logger.debug(`Creating new transaction from ${From} to ${To}`);
+
+		this.index = index;
 
 		this.date = moment(Date, "DD/MM/YYYY");
 		this.from = From;
@@ -14,8 +18,7 @@ export default class Transaction {
 		this.amount = parseFloat(Amount);
 
 		if (Number.isNaN(this.amount)) {
-			logger.error("Transaction amount is not a number");
-			throw "Transaction amount is not a number";
+			throw new TransactionError(this, "Transaction amount is not a number");
 		}
 	}
 }

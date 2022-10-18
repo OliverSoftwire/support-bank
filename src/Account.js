@@ -3,6 +3,7 @@ import chalk from "chalk";
 import log4js from "log4js";
 
 import { formatBalance, formatCurrency } from "./utils.js";
+import { AccountError } from "./Errors.js";
 
 const logger = log4js.getLogger("Account");
 
@@ -30,8 +31,7 @@ export default class Account {
 			return;
 		}
 
-		logger.error("Invalid transaction, account is neither sender nor receiver");
-		throw "Invalid transaction, account is neither sender nor receiver";
+		throw new AccountError(this, "Invalid transaction, account is neither sender nor receiver");
 	}
 
 	toString() {

@@ -41,9 +41,15 @@ readlineSync.promptCLLoop({
 
 		if (!lastName) {
 			console.log("First argument was not all and no last name given");
+			return;
 		}
 
-		const account = bank.getAccount(`${firstName} ${lastName}`);
-		console.log(account.toString());
+		const name = `${firstName} ${lastName}`;
+		if (!bank.accountExists(name)) {
+			console.log(`Account '${name}' does not exist`);
+			return;
+		}
+
+		console.log(bank.getAccount(name).toString());
 	}
 });

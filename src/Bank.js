@@ -8,6 +8,7 @@ import { Table } from "console-table-printer";
 import Account from "./Account.js";
 import { formatBalance } from "./utils.js";
 import Transaction from "./Transaction.js";
+import { BankError } from "./Errors.js";
 
 const logger = log4js.getLogger("Bank");
 
@@ -21,37 +22,43 @@ export default class Bank {
 		return name.toLowerCase();
 	}
 
-	createAccount(name) {
+	accountExists(name) {
 		const id = this.nameToId(name);
+		return this.accounts.hasOwnProperty(id);
+	}
 
-		if (this.accounts.hasOwnProperty(id)) {
-			logger.error(`Account '${this.accounts[id].name}' already exists`);
-			throw `Account '${this.accounts[id].name}' already exists`;
+	createAccount(name) {
+		if (this.accountExists(name)) {
+			throw new BankError(`Account '${this.getAccount(name).name}' already exists`);
 		}
 
-		this.accounts[id] = new Account(name);
+		this.accounts[this.nameToId(name)] = new Account(name);
 	}
 
 	getAccount(name) {
-		const id = this.nameToId(name);
-
-		if (!this.accounts.hasOwnProperty(id)) {
-			logger.error(`Account '${name}' does not exist`);
-			throw `Account '${name}' does not exist`;
+		if (!this.accountExists(name)) {
+			throw new BankError(`Account '${name}' does not exist`);
 		}
 
-		return this.accounts[id];
+		return this.accounts[this.nameToId(name)];
 	}
 
 	parseTransactions(path) {
 		logger.debug("Reading transactions file");
-		const data = fs.readFileSync(path);
+
+		let data;
+		try {
+			data = fs.readFileSync(path);
+		} catch (err) {
+			logger.error(err.message);
+			throw new BankError("Failed to read transactions file (check the log for details)");
+		}
 
 		logger.debug("Parsing transactions file");
 		this.transactions = parse(data, {
 			columns: true,
 			skip_empty_lines: true
-		}).map(transaction => new Transaction(transaction));
+		}).map((transaction, index) => new Transaction(transaction, index));
 
 		logger.debug("Extracting unique names");
 		const names = this.transactions
@@ -59,7 +66,11 @@ export default class Bank {
 			.concat(this.transactions.map(({ to }) => to));
 
 		logger.debug("Creating accounts");
-		lodash.uniq(names).forEach(name => this.createAccount(name));
+		lodash.uniq(names).forEach(name => {
+			if (!this.accountExists(name)) {
+				this.createAccount(name);
+			}
+		});
 
 		logger.debug("Processing transactions");
 		this.transactions.forEach(transaction => {
