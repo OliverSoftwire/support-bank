@@ -3,6 +3,7 @@ import { parse } from "csv-parse/sync";
 import lodash from "lodash";
 import log4js from "log4js";
 import path from "path";
+import { XMLParser } from "fast-xml-parser";
 
 import { Table } from "console-table-printer";
 
@@ -12,6 +13,10 @@ import { Transaction, TransactionFormat } from "./Transaction.js";
 import { BankError } from "./Errors.js";
 
 const logger = log4js.getLogger("src/Bank.js");
+const xmlParser = new XMLParser({
+	ignoreAttributes: false,
+	attributeNamePrefix: "_"
+});
 
 function transactionFormatFromPath(filepath) {
 	switch (path.extname(filepath)) {
@@ -22,7 +27,7 @@ function transactionFormatFromPath(filepath) {
 		case ".csv":
 			return TransactionFormat.CSV;
 		default:
-			logger.warn("Filepath has no extension, defaulting to CSV");
+			logger.warn("Filepath has unknown extension, defaulting to CSV");
 			return TransactionFormat.CSV;
 	}
 }
@@ -46,6 +51,8 @@ function parseTransactionFile(data, format) {
 				});
 			case TransactionFormat.JSON:
 				return JSON.parse(data);
+			case TransactionFormat.XML:
+				return xmlParser.parse(data).TransactionList.SupportTransaction;
 			default:
 				logger.fatal("Invalid transaction file format");
 				throw new Error("Invalid transaction file format");

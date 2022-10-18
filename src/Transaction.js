@@ -1,4 +1,4 @@
-import moment from "moment";
+import moment from "moment-msdate";
 import log4js from "log4js";
 
 import { TransactionError } from "./Errors.js";
@@ -24,6 +24,9 @@ export class Transaction {
 				break;
 			case TransactionFormat.JSON:
 				this.fromJSON(transaction);
+				break;
+			case TransactionFormat.XML:
+				this.fromXML(transaction);
 				break;
 			default:
 				logger.fatal("Invalid transaction file format");
@@ -53,5 +56,13 @@ export class Transaction {
 		this.to = ToAccount;
 		this.narrative = Narrative;
 		this.amount = Amount;
+	}
+
+	fromXML({ Description, Value, Parties, _Date }) {
+		this.date = moment.fromOADate(parseInt(_Date));
+		this.from = Parties.From;
+		this.to = Parties.To;
+		this.narrative = Description;
+		this.amount = Value;
 	}
 }
