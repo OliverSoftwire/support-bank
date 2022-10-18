@@ -12,6 +12,27 @@ import { BankError } from "./Errors.js";
 
 const logger = log4js.getLogger("src/Bank.js");
 
+function readTransactionsFile(path) {
+	try {
+		return fs.readFileSync(path);
+	} catch (err) {
+		logger.error(err.message);
+		throw new BankError("Failed to read transactions file (check the log for details)");
+	}
+}
+
+function parseCSVTransactionFile(data) {
+	try {
+		return parse(data, {
+			columns: true,
+			skip_empty_lines: true
+		})
+	} catch (err) {
+		logger.error(err.message);
+		throw new BankError("Failed to parse transactions file (check the log for details)");
+	}
+}
+
 export default class Bank {
 	constructor() {
 		this.transactions = [];
@@ -45,29 +66,13 @@ export default class Bank {
 
 	parseTransactions(path) {
 		logger.debug("Reading transactions file");
-
-		let data;
-		try {
-			data = fs.readFileSync(path);
-		} catch (err) {
-			logger.error(err.message);
-			throw new BankError("Failed to read transactions file (check the log for details)");
-		}
+		const transactionFileData = readTransactionsFile(path);	
 
 		logger.debug("Parsing transactions file");
-		let newTransactions;
-		try {
-			newTransactions = parse(data, {
-				columns: true,
-				skip_empty_lines: true
-			})
-		} catch (err) {
-			logger.error(err.message);
-			throw new BankError("Failed to parse transactions file (check the log for details)");
-		}
+		const newTransactions = parseCSVTransactionFile(transactionFileData).map(
+			(transaction, index) => new Transaction(transaction, index)
+		);
 
-		logger.debug("Creating transactions");
-		newTransactions = newTransactions.map((transaction, index) => new Transaction(transaction, index));
 		this.transactions = this.transactions.concat(newTransactions);
 
 		logger.debug("Extracting unique names");
