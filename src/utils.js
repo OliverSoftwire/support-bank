@@ -5,5 +5,5 @@ export function formatCurrency(amount) {
 }
 
 export function formatBalance(balance) {
-	return balance < 0 ? chalk.red(`(${formatCurrency(balance)})`) : chalk.green(formatCurrency(balance));
+	return balance < 0 ? chalk.red(`(${formatCurrency(-balance)})`) : chalk.green(formatCurrency(balance));
 }
