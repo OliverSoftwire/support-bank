@@ -32,7 +32,20 @@ function transactionFormatFromPath(filepath) {
 	}
 }
 
+function fileExistsSafe(path) {
+	try {
+		return fs.existsSync(path);
+	} catch (err) {
+		logger.error(err.message);
+		throw new BankError("Failed to get if file exists (check the log for details)");
+	}
+}
+
 function readTransactionsFile(path) {
+	if (!fileExistsSafe(path)) {
+		throw new BankError(`File ${path} does not exist`);
+	}
+
 	try {
 		return fs.readFileSync(path);
 	} catch (err) {
