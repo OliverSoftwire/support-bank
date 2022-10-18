@@ -30,6 +30,10 @@ export class Transaction {
 				throw new Error("Invalid transaction format");
 		}
 
+		if (!this.date.isValid()) {
+			throw new TransactionError(this, "Transaction date is invalid");
+		}
+
 		if (Number.isNaN(this.amount)) {
 			throw new TransactionError(this, "Transaction amount is not a number");
 		}
