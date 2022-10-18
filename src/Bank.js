@@ -1,8 +1,13 @@
 import * as fs from "fs";
-import { parse } from "csv-parse/sync";
+import path from "path";
+
 import lodash from "lodash";
 import log4js from "log4js";
-import path from "path";
+import moment from "moment";
+
+import { parse } from "csv-parse/sync";
+import { stringify } from "csv-stringify/sync";
+
 import { XMLParser } from "fast-xml-parser";
 
 import { Table } from "console-table-printer";
@@ -76,6 +81,33 @@ function parseTransactionFile(data, format) {
 	}
 }
 
+function stringifyTransactions(transactions) {
+	try {
+		return stringify(transactions, {
+			header: true,
+			columns: [
+				{ key: "date", header: "Date" },
+				{ key: "from", header: "From" },
+				{ key: "to", header: "To" },
+				{ key: "narrative", header: "Narrative" },
+				{ key: "amount", header: "Amount" }
+			],
+			cast: {
+				object: (value) => {
+					if (!moment.isMoment(value)) {
+						return value;
+					}
+
+					return value.format("DD/MM/YYYY");
+				}
+			}
+		});
+	} catch (err) {
+		logger.error(err.message);
+		throw new BankError("Failed to stringify transactions (check the log for details)");
+	}
+}
+
 export default class Bank {
 	constructor() {
 		this.transactions = [];
@@ -107,7 +139,7 @@ export default class Bank {
 		return this.accounts[this.nameToId(name)];
 	}
 
-	parseTransactions(filepath) {
+	loadTransactions(filepath) {
 		const format = transactionFormatFromPath(filepath);
 
 		logger.info(`Reading transactions from ${filepath}`);
@@ -137,6 +169,21 @@ export default class Bank {
 			this.getAccount(transaction.from).processTransaction(transaction);
 			this.getAccount(transaction.to).processTransaction(transaction);
 		});
+	}
+
+	saveTransactions(filepath) {
+		logger.info(`Saving transactions to ${filepath}`);
+
+		logger.info("Stringifying transactions");
+		const csvString = stringifyTransactions(this.transactions);
+
+		logger.info("Writing to file");
+		try {
+			fs.writeFileSync(filepath, csvString);
+		} catch (err) {
+			logger.error(err.message);
+			throw new BankError("Failed to write file (check the log for details)");
+		}
 	}
 
 	toString() {

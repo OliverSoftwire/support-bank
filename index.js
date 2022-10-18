@@ -57,9 +57,24 @@ readlineSync.promptCLLoop({
 		console.log(`Loading transactions from ${path.resolve(filepath)}...`);
 
 		try {
-			bank.parseTransactions(filepath);
+			bank.loadTransactions(filepath);
 		} catch (err) {
 			console.log("An error occured while loading the transactions file:");
+			console.log("    " + err.message);
+		}
+	},
+	save: (filepath) => {
+		if (!filepath) {
+			console.log("No file was specified");
+			return;
+		}
+
+		console.log(`Saving transactions to ${path.resolve(filepath)}...`);
+
+		try {
+			bank.saveTransactions(filepath);
+		} catch (err) {
+			console.log("An error occured while saving transactions:");
 			console.log("    " + err.message);
 		}
 	}
