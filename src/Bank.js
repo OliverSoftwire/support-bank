@@ -65,29 +65,29 @@ export default class Bank {
 	}
 
 	parseTransactions(path) {
-		logger.debug("Reading transactions file");
+		logger.info(`Reading transactions from ${path}`);
 		const transactionFileData = readTransactionsFile(path);	
 
-		logger.debug("Parsing transactions file");
+		logger.info("Parsing transactions file");
 		const newTransactions = parseCSVTransactionFile(transactionFileData).map(
 			(transaction, index) => new Transaction(transaction, index)
 		);
 
 		this.transactions = this.transactions.concat(newTransactions);
 
-		logger.debug("Extracting unique names");
+		logger.info("Extracting unique names");
 		const names = this.transactions
 			.map(({ from }) => from)
 			.concat(this.transactions.map(({ to }) => to));
 
-		logger.debug("Creating accounts");
+		logger.info("Creating accounts");
 		lodash.uniq(names).forEach(name => {
 			if (!this.accountExists(name)) {
 				this.createAccount(name);
 			}
 		});
 
-		logger.debug("Processing transactions");
+		logger.info("Processing transactions");
 		newTransactions.forEach(transaction => {
 			this.getAccount(transaction.from).processTransaction(transaction);
 			this.getAccount(transaction.to).processTransaction(transaction);
