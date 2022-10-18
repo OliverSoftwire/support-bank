@@ -1,12 +1,15 @@
 import * as fs from "fs";
 import { parse } from "csv-parse/sync";
 import lodash from "lodash";
+import log4js from "log4js";
 
 import { Table } from "console-table-printer";
 
 import Account from "./Account.js";
 import { formatBalance } from "./utils.js";
 import Transaction from "./Transaction.js";
+
+const logger = log4js.getLogger("Bank");
 
 export default class Bank {
 	constructor() {
@@ -22,6 +25,7 @@ export default class Bank {
 		const id = this.nameToId(name);
 
 		if (this.accounts.hasOwnProperty(id)) {
+			logger.error(`Account '${this.accounts[id].name}' already exists`);
 			throw `Account '${this.accounts[id].name}' already exists`;
 		}
 
@@ -32,6 +36,7 @@ export default class Bank {
 		const id = this.nameToId(name);
 
 		if (!this.accounts.hasOwnProperty(id)) {
+			logger.error(`Account '${name}' does not exist`);
 			throw `Account '${name}' does not exist`;
 		}
 
@@ -39,19 +44,24 @@ export default class Bank {
 	}
 
 	parseTransactions(path) {
+		logger.debug("Reading transactions file");
 		const data = fs.readFileSync(path);
+
+		logger.debug("Parsing transactions file");
 		this.transactions = parse(data, {
 			columns: true,
 			skip_empty_lines: true
 		}).map(transaction => new Transaction(transaction));
 
+		logger.debug("Extracting unique names");
 		const names = this.transactions
 			.map(({ from }) => from)
 			.concat(this.transactions.map(({ to }) => to));
 
-		const uniqueNames = lodash.uniq(names);
-		uniqueNames.forEach(name => this.createAccount(name));
+		logger.debug("Creating accounts");
+		lodash.uniq(names).forEach(name => this.createAccount(name));
 
+		logger.debug("Processing transactions");
 		this.transactions.forEach(transaction => {
 			this.getAccount(transaction.from).processTransaction(transaction);
 			this.getAccount(transaction.to).processTransaction(transaction);

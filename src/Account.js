@@ -1,15 +1,23 @@
 import { Table } from "console-table-printer";
 import chalk from "chalk";
+import log4js from "log4js";
+
 import { formatBalance, formatCurrency } from "./utils.js";
+
+const logger = log4js.getLogger("Account");
 
 export default class Account {
 	constructor(name) {
+		logger.debug(`Creating new account ${name}`);
+
 		this.name = name;
 		this.balance = 0;
 		this.transactions = [];
 	}
 
 	processTransaction(transaction) {
+		logger.debug(`Account ${this.name} processing transaction`);
+
 		if (transaction.from === this.name) {
 			this.balance -= transaction.amount;
 			this.transactions.push(transaction);
@@ -22,6 +30,7 @@ export default class Account {
 			return;
 		}
 
+		logger.error("Invalid transaction, account is neither sender nor receiver");
 		throw "Invalid transaction, account is neither sender nor receiver";
 	}
 
