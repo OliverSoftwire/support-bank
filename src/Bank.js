@@ -47,6 +47,7 @@ function parseTransactionFile(data, format) {
 			case TransactionFormat.JSON:
 				return JSON.parse(data);
 			default:
+				logger.fatal("Invalid transaction file format");
 				throw new Error("Invalid transaction file format");
 		}
 	} catch (err) {

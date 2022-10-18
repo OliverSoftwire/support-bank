@@ -26,6 +26,7 @@ export class Transaction {
 				this.fromJSON(transaction);
 				break;
 			default:
+				logger.fatal("Invalid transaction file format");
 				throw new TransactionError(this, "Invalid transaction format");
 		}
 
