@@ -2,15 +2,30 @@ import * as fs from "fs";
 import { parse } from "csv-parse/sync";
 import lodash from "lodash";
 import log4js from "log4js";
+import path from "path";
 
 import { Table } from "console-table-printer";
 
 import Account from "./Account.js";
 import { formatBalance } from "./utils.js";
-import Transaction from "./Transaction.js";
+import { Transaction, TransactionFormat } from "./Transaction.js";
 import { BankError } from "./Errors.js";
 
 const logger = log4js.getLogger("src/Bank.js");
+
+function transactionFormatFromPath(filepath) {
+	switch (path.extname(filepath)) {
+		case ".json":
+			return TransactionFormat.JSON;
+		case ".xml":
+			return TransactionFormat.XML;
+		case ".csv":
+			return TransactionFormat.CSV;
+		default:
+			logger.warn("Filepath has no extension, defaulting to CSV");
+			return TransactionFormat.CSV;
+	}
+}
 
 function readTransactionsFile(path) {
 	try {
@@ -21,12 +36,19 @@ function readTransactionsFile(path) {
 	}
 }
 
-function parseCSVTransactionFile(data) {
+function parseTransactionFile(data, format) {
 	try {
-		return parse(data, {
-			columns: true,
-			skip_empty_lines: true
-		})
+		switch (format) {
+			case TransactionFormat.CSV:
+				return parse(data, {
+					columns: true,
+					skip_empty_lines: true
+				});
+			case TransactionFormat.JSON:
+				return JSON.parse(data);
+			default:
+				throw new Error("Invalid transaction file format");
+		}
 	} catch (err) {
 		logger.error(err.message);
 		throw new BankError("Failed to parse transactions file (check the log for details)");
@@ -64,13 +86,15 @@ export default class Bank {
 		return this.accounts[this.nameToId(name)];
 	}
 
-	parseTransactions(path) {
-		logger.info(`Reading transactions from ${path}`);
-		const transactionFileData = readTransactionsFile(path);	
+	parseTransactions(filepath) {
+		const format = transactionFormatFromPath(filepath);
+
+		logger.info(`Reading transactions from ${filepath}`);
+		const transactionFileData = readTransactionsFile(filepath);	
 
 		logger.info("Parsing transactions file");
-		const newTransactions = parseCSVTransactionFile(transactionFileData).map(
-			(transaction, index) => new Transaction(transaction, index)
+		const newTransactions = parseTransactionFile(transactionFileData, format).map(
+			(transaction, index) => new Transaction(transaction, index, format)
 		);
 
 		this.transactions = this.transactions.concat(newTransactions);

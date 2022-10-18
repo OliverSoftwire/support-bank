@@ -52,7 +52,7 @@ export default class Account {
 				},
 				{
 					name: "Reference",
-					function: (row) => row.reference
+					function: (row) => row.narrative
 				},
 				{
 					name: "Debit",
