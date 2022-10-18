@@ -1,5 +1,6 @@
 import readlineSync from "readline-sync";
 import log4js from "log4js";
+import path from "path";
 
 import Bank from "./src/Bank.js";
 
@@ -16,40 +17,50 @@ const logger = log4js.getLogger("Main");
 logger.info("Support Bank started");
 
 const bank = new Bank();
-bank.parseTransactions("DodgyTransactions2015.csv");
 
 console.log("Welcome to Support Bank");
 console.log("Use 'help' to see available commands");
 
 readlineSync.promptCLLoop({
 	help: () => {
+		console.log("load      - Loads transactions from a file (supports csv)");
 		console.log("list      - Lists transactions for a user, or a summary of all accounts if 'all' is passed");
 		console.log("exit|quit - exit the prompt");
 	},
 	exit: () => true,
 	quit: () => true,
-	list: (firstName, lastName) => {
-		if (!firstName) {
+	list: (...args) => {
+		if (!args[0]) {
 			console.log("list takes at least one argument");
 			return;
 		}
 
-		if (firstName.toLowerCase() === "all") {
+		if (args[0].toLowerCase() === "all") {
 			console.log(bank.toString());
 			return;
 		}
 
-		if (!lastName) {
-			console.log("First argument was not all and no last name given");
-			return;
-		}
-
-		const name = `${firstName} ${lastName}`;
+		const name = args.join(" ");
 		if (!bank.accountExists(name)) {
 			console.log(`Account '${name}' does not exist`);
 			return;
 		}
 
 		console.log(bank.getAccount(name).toString());
+	},
+	load: (filepath) => {
+		if (!filepath) {
+			console.log("No file was specified");
+			return;
+		}
+
+		console.log(`Loading transactions from ${path.resolve(filepath)}...`);
+
+		try {
+			bank.parseTransactions(filepath);
+		} catch (err) {
+			console.log("An error occured while loading the transactions file:");
+			console.log("    " + err.message);
+		}
 	}
 });

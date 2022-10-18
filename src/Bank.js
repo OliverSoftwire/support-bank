@@ -10,7 +10,7 @@ import { formatBalance } from "./utils.js";
 import Transaction from "./Transaction.js";
 import { BankError } from "./Errors.js";
 
-const logger = log4js.getLogger("Bank");
+const logger = log4js.getLogger("src/Bank.js");
 
 export default class Bank {
 	constructor() {
@@ -55,10 +55,20 @@ export default class Bank {
 		}
 
 		logger.debug("Parsing transactions file");
-		this.transactions = parse(data, {
-			columns: true,
-			skip_empty_lines: true
-		}).map((transaction, index) => new Transaction(transaction, index));
+		let newTransactions;
+		try {
+			newTransactions = parse(data, {
+				columns: true,
+				skip_empty_lines: true
+			})
+		} catch (err) {
+			logger.error(err.message);
+			throw new BankError("Failed to parse transactions file (check the log for details)");
+		}
+
+		logger.debug("Creating transactions");
+		newTransactions = newTransactions.map((transaction, index) => new Transaction(transaction, index));
+		this.transactions = this.transactions.concat(newTransactions);
 
 		logger.debug("Extracting unique names");
 		const names = this.transactions
@@ -73,7 +83,7 @@ export default class Bank {
 		});
 
 		logger.debug("Processing transactions");
-		this.transactions.forEach(transaction => {
+		newTransactions.forEach(transaction => {
 			this.getAccount(transaction.from).processTransaction(transaction);
 			this.getAccount(transaction.to).processTransaction(transaction);
 		});

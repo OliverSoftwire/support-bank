@@ -5,7 +5,7 @@ import log4js from "log4js";
 import { formatBalance, formatCurrency } from "./utils.js";
 import { AccountError } from "./Errors.js";
 
-const logger = log4js.getLogger("Account");
+const logger = log4js.getLogger("src/Account.js");
 
 export default class Account {
 	constructor(name) {
