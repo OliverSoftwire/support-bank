@@ -1,6 +1,7 @@
 import readlineSync from "readline-sync";
 import log4js from "log4js";
 import path from "path";
+import fs from "fs";
 
 import Bank from "./src/Bank.js";
 
@@ -23,7 +24,8 @@ console.log("Use 'help' to see available commands");
 
 readlineSync.promptCLLoop({
 	help: () => {
-		console.log("load      - Loads transactions from a file (supports csv)");
+		console.log("load      - Loads transactions from a file (supports csv, json and xml)");
+		console.log("save      - Saves all loaded transactions to a file (csv only)")
 		console.log("list      - Lists transactions for a user, or a summary of all accounts if 'all' is passed");
 		console.log("exit|quit - exit the prompt");
 	},
@@ -66,6 +68,13 @@ readlineSync.promptCLLoop({
 	save: (filepath) => {
 		if (!filepath) {
 			console.log("No file was specified");
+			return;
+		}
+
+		if (
+			fs.existsSync(filepath) &&
+			!readlineSync.keyInYNStrict("File already exists, do you want to overwrite?")
+		) {
 			return;
 		}
 
