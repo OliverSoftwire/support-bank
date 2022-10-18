@@ -1,6 +1,7 @@
 import { Table } from "console-table-printer";
 import chalk from "chalk";
 import log4js from "log4js";
+import lodash from "lodash";
 
 import { formatBalance, formatCurrency } from "./utils.js";
 import { AccountError } from "./Errors.js";
@@ -64,7 +65,7 @@ export default class Account {
 			]
 		});
 
-		table.addRows(Object.values(this.transactions));
+		table.addRows(Object.values(this.transactions).map(transaction => lodash.clone(transaction)));
 		return table.render();
 	}
 }

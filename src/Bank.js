@@ -107,7 +107,7 @@ export default class Bank {
 			]
 		});
 
-		table.addRows(Object.values(this.accounts));
+		table.addRows(Object.values(this.accounts).map(account => lodash.clone(account)));
 		return table.render();
 	}
 }
