@@ -47,7 +47,7 @@ export default class Account {
 					function: (row) => row.date.format("YYYY-MM-DD")
 				},
 				{
-					name: "Payee",
+					name: "To/From",
 					function: (row) => row.from === this.name ? row.to : row.from
 				},
 				{
