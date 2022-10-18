@@ -1,8 +1,12 @@
 import * as fs from "fs";
 import { parse } from "csv-parse/sync";
 import lodash from "lodash";
+import moment from "moment";
+
+import { Table } from "console-table-printer";
 
 import Account from "./Account.js";
+import { formatBalance } from "./utils.js";
 
 export default class Bank {
 	constructor() {
@@ -50,12 +54,32 @@ export default class Bank {
 		uniqueNames.forEach(name => this.createAccount(name));
 
 		this.transactions.forEach(transaction => {
+			transaction.Date = moment(transaction.Date, "DD/MM/YYYY");
+			console.log(transaction.Date);
 			this.getAccount(transaction.From).processTransaction(transaction);
 			this.getAccount(transaction.To).processTransaction(transaction);
 		});
 	}
 
 	toString() {
-		return this.accounts;
+		const table = new Table({
+			title: "Accounts Summary",
+			enabledColumns: ["name", "balance-coloured"],
+			columns: [
+				{ name: "name", alignment: "right" , title: "Name"}
+			],
+			sort: (row1, row2) => row1.name.localeCompare(row2.name),
+			computedColumns: [
+				{
+					name: "balance-coloured",
+					title: "Balance",
+					function: (row) => formatBalance(row.balance),
+					alignment: "left"
+				}
+			]
+		});
+
+		table.addRows(Object.values(this.accounts));
+		return table.render();
 	}
 }

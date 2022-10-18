@@ -11,8 +11,11 @@
 	"author": "",
 	"license": "MIT",
 	"dependencies": {
+		"chalk": "^5.1.2",
+		"console-table-printer": "^2.11.1",
 		"csv-parse": "^5.3.1",
 		"lodash": "^4.17.21",
+		"moment": "^2.29.4",
 		"readline-sync": "^1.4.10"
 	}
 }
