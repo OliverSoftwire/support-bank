@@ -27,7 +27,7 @@ export class Transaction {
 				break;
 			default:
 				logger.fatal("Invalid transaction file format");
-				throw new TransactionError(this, "Invalid transaction format");
+				throw new Error("Invalid transaction format");
 		}
 
 		if (Number.isNaN(this.amount)) {
