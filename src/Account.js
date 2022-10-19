@@ -20,7 +20,7 @@ export default class Account {
 	}
 
 	processTransaction(transaction) {
-		logger.debug(`Account ${this.name} processing transaction`);
+		logger.debug(`Account ${this.name} processing transaction ${transaction.index} (${transaction.from} -> ${transaction.to})`);
 
 		if (transaction.from === this.name) {
 			this.balance = this.balance.minus(transaction.amount);
