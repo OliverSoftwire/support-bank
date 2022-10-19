@@ -142,6 +142,11 @@ readlineSync.promptCLLoop({
 		}
 
 		date = date === "today" ? moment() : moment(date, "YYYY-MM-DD");
+		if (date.isAfter()) {
+			console.log("Cannot create a transaction in the future");
+			return;
+		}
+
 		from = capitaliseEachWord(from);
 		to = capitaliseEachWord(to);
 
