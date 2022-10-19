@@ -1,7 +1,8 @@
+import fs from "fs";
+import path from "path";
+
 import readlineSync from "readline-sync";
 import log4js from "log4js";
-import path from "path";
-import fs from "fs";
 
 import Bank from "./src/Bank.js";
 import { isFile } from "./src/utils.js";

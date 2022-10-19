@@ -1,5 +1,5 @@
-import chalk from "chalk";
 import fs from "fs";
+import chalk from "chalk";
 
 export function formatCurrency(amount) {
 	return `£${amount}`;

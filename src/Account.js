@@ -1,8 +1,9 @@
-import { Table } from "console-table-printer";
-import chalk from "chalk";
 import log4js from "log4js";
 import lodash from "lodash";
 import { Decimal } from "decimal.js";
+
+import { Table } from "console-table-printer";
+import chalk from "chalk";
 
 import { formatBalance, formatCurrency } from "./utils.js";
 import { AccountError } from "./Errors.js";
