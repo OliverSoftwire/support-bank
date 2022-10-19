@@ -54,7 +54,7 @@ readlineSync.promptCLLoop({
 			return;
 		}
 
-		if (args[0].toLowerCase() === "all") {
+		if (args[0].toLowerCase() === "all" && args.length === 1) {
 			console.log(bank.toString());
 			return;
 		}
