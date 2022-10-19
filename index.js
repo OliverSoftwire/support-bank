@@ -6,7 +6,7 @@ import log4js from "log4js";
 import moment from "moment";
 
 import Bank from "./src/Bank.js";
-import { isFile, capitaliseEachWord } from "./src/utils.js";
+import { isFile } from "./src/utils.js";
 import { Transaction } from "./src/Transaction.js";
 
 log4js.configure({
@@ -64,7 +64,7 @@ readlineSync.promptCLLoop({
 			return;
 		}
 
-		const name = capitaliseEachWord(args.join(" "));
+		const name = args.join(" ");
 		if (!bank.accountExists(name)) {
 			console.log(`Account '${name}' does not exist`);
 			return;
@@ -141,9 +141,6 @@ readlineSync.promptCLLoop({
 			console.log("Cannot create a transaction in the future");
 			return;
 		}
-
-		from = capitaliseEachWord(from);
-		to = capitaliseEachWord(to);
 
 		try {
 			bank.addTransaction(new Transaction(date, from, to, reference, amount));

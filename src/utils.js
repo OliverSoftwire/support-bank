@@ -12,7 +12,3 @@ export function formatBalance(balance) {
 export function isFile(path) {
 	return fs.existsSync(path) && fs.lstatSync(path).isFile();
 }
-
-export function capitaliseEachWord(str) {
-	return str.split(" ").filter(word => word).map(word => word[0].toUpperCase() + word.slice(1).toLowerCase()).join(" ");
-}
