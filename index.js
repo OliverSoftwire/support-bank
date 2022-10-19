@@ -7,10 +7,25 @@ import Bank from "./src/Bank.js";
 
 log4js.configure({
 	appenders: {
-		file: { type: "fileSync", filename: "logs/debug.log" }
+		default: {
+			type: "fileSync",
+			filename: "logs/debug.log"
+		},
+		info_file: {
+			type: "fileSync",
+			filename: "logs/info.log"
+		},
+		info: {
+			type: "logLevelFilter",
+			level: "info",
+			appender: "info_file"
+		}
 	},
 	categories: {
-		default: { appenders: ["file"], level: "debug" }
+		default: {
+			appenders: ["default", "info"],
+			level: "all"
+		}
 	}
 });
 
