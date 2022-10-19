@@ -2,7 +2,7 @@ import fs from "fs";
 import chalk from "chalk";
 
 export function formatCurrency(amount) {
-	return `£${amount}`;
+	return `£${amount.toFixed(2)}`;
 }
 
 export function formatBalance(balance) {
