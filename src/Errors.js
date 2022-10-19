@@ -3,10 +3,9 @@ import log4js from "log4js";
 const logger = log4js.getLogger("src/Errors.js");
 
 export class TransactionError extends Error {
-	constructor({ index, from, to }, message) {
+	constructor({ from, to }, message) {
 		super(message);
 
-		this.index = index;
 		this.from = from;
 		this.to = to;
 	}
