@@ -4,6 +4,7 @@ import path from "path";
 import lodash from "lodash";
 import log4js from "log4js";
 import moment from "moment";
+import Decimal from "decimal.js";
 
 import { parse } from "csv-parse/sync";
 import { stringify } from "csv-stringify/sync";
@@ -45,7 +46,7 @@ function readTransactionsFile(path) {
 	try {
 		return fs.readFileSync(path);
 	} catch (err) {
-		logger.error(err.message);
+		logger.error(err);
 		throw new BankError("Failed to read transactions file (check the log for details)");
 	}
 }
@@ -67,34 +68,27 @@ function parseTransactionFile(data, format) {
 				throw new Error("Invalid transaction file format");
 		}
 	} catch (err) {
-		logger.error(err.message);
+		logger.error(err);
 		throw new BankError("Failed to parse transactions file (check the log for details)");
 	}
 }
 
 function stringifyTransactions(transactions) {
 	try {
-		return stringify(transactions, {
-			header: true,
-			columns: [
-				{ key: "date", header: "Date" },
-				{ key: "from", header: "From" },
-				{ key: "to", header: "To" },
-				{ key: "narrative", header: "Narrative" },
-				{ key: "amount", header: "Amount" }
-			],
-			cast: {
-				object: (value) => {
-					if (!moment.isMoment(value)) {
-						return value;
-					}
-
-					return value.format("DD/MM/YYYY");
-				}
+		return stringify(
+			transactions.map(({ date, from, to, narrative, amount }) => ({
+				Date: date.format("DD/MM/YYYY"),
+				From: from,
+				To: to,
+				Narrative: narrative,
+				Amount: amount.toString()
+			})),
+			{
+				header: true
 			}
-		});
+		);
 	} catch (err) {
-		logger.error(err.message);
+		logger.error(err);
 		throw new BankError("Failed to stringify transactions (check the log for details)");
 	}
 }
@@ -172,7 +166,7 @@ export default class Bank {
 		try {
 			fs.writeFileSync(filepath, csvString);
 		} catch (err) {
-			logger.error(err.message);
+			logger.error(err);
 			throw new BankError("Failed to write file (check the log for details)");
 		}
 	}

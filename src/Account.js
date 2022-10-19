@@ -2,6 +2,7 @@ import { Table } from "console-table-printer";
 import chalk from "chalk";
 import log4js from "log4js";
 import lodash from "lodash";
+import { Decimal } from "decimal.js";
 
 import { formatBalance, formatCurrency } from "./utils.js";
 import { AccountError } from "./Errors.js";
@@ -13,7 +14,7 @@ export default class Account {
 		logger.debug(`Creating new account ${name}`);
 
 		this.name = name;
-		this.balance = 0;
+		this.balance = new Decimal(0);
 		this.transactions = [];
 	}
 
@@ -21,13 +22,13 @@ export default class Account {
 		logger.debug(`Account ${this.name} processing transaction`);
 
 		if (transaction.from === this.name) {
-			this.balance -= transaction.amount;
+			this.balance = this.balance.minus(transaction.amount);
 			this.transactions.push(transaction);
 			return;
 		}
 
 		if (transaction.to === this.name) {
-			this.balance += transaction.amount;
+			this.balance = this.balance.plus(transaction.amount);
 			this.transactions.push(transaction);
 			return;
 		}

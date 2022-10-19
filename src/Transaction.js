@@ -1,5 +1,6 @@
 import moment from "moment-msdate";
 import log4js from "log4js";
+import { Decimal } from "decimal.js";
 
 import { TransactionError } from "./Errors.js";
 
@@ -37,8 +38,11 @@ export class Transaction {
 			throw new TransactionError(this, "Transaction date is invalid");
 		}
 
-		if (Number.isNaN(this.amount)) {
-			throw new TransactionError(this, "Transaction amount is not a number");
+		try {
+			this.amount = new Decimal(this.amount);
+		} catch (err) {
+			logger.error(err);
+			throw new TransactionError(this, "Transaction amount is not a number (check the log for details)");
 		}
 	}
 
@@ -47,7 +51,7 @@ export class Transaction {
 		this.from = From;
 		this.to = To;
 		this.narrative = Narrative;
-		this.amount = parseFloat(Amount);
+		this.amount = Amount;
 	}
 
 	fromJSON({ Date, FromAccount, ToAccount, Narrative, Amount }) {
