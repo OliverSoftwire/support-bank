@@ -13,60 +13,67 @@ export const TransactionFormat = {
 }
 
 export class Transaction {
-	constructor(transaction, index, format) {
-		logger.debug(`Creating new transaction from row ${index} (${transaction.From} -> ${transaction.To})`);
+	constructor(date, from, to, narrative, amount) {
+		logger.debug(`Creating new transaction ${from} -> ${to}`);
 
-		this.index = index;
-		this.format = format;
-
-		switch (format) {
-			case TransactionFormat.CSV:
-				this.fromCSV(transaction);
-				break;
-			case TransactionFormat.JSON:
-				this.fromJSON(transaction);
-				break;
-			case TransactionFormat.XML:
-				this.fromXML(transaction);
-				break;
-			default:
-				logger.fatal("Invalid transaction file format");
-				throw new Error("Invalid transaction format");
+		if (!moment.isMoment(date)) {
+			throw new TransactionError(this, "Transaction date is not a Moment");
 		}
-
-		if (!this.date.isValid()) {
+		if (!date.isValid()) {
 			throw new TransactionError(this, "Transaction date is invalid");
 		}
 
 		try {
-			this.amount = new Decimal(this.amount);
+			this.amount = new Decimal(amount);
 		} catch (err) {
 			logger.error(err);
 			throw new TransactionError(this, "Transaction amount is not a number (check the log for details)");
 		}
+
+		this.date = date;
+		this.from = from;
+		this.to = to;
+		this.narrative = narrative;
 	}
 
-	fromCSV({ Date, From, To, Narrative, Amount }) {
-		this.date = moment(Date, "DD/MM/YYYY");
-		this.from = From;
-		this.to = To;
-		this.narrative = Narrative;
-		this.amount = Amount;
+	static fromData(transaction, format) {
+		switch (format) {
+			case TransactionFormat.CSV:
+				return Transaction.fromCSV(transaction);
+			case TransactionFormat.JSON:
+				return Transaction.fromJSON(transaction);
+			case TransactionFormat.XML:
+				return Transaction.fromXML(transaction);
+			default:
+				logger.fatal("Invalid transaction file format");
+				throw new Error("Invalid transaction format");
+		}
 	}
 
-	fromJSON({ Date, FromAccount, ToAccount, Narrative, Amount }) {
-		this.date = moment(Date, "YYYY-MM-DDThh:mm:ss");
-		this.from = FromAccount;
-		this.to = ToAccount;
-		this.narrative = Narrative;
-		this.amount = Amount;
+	static fromCSV({ Date, From, To, Narrative, Amount }) {
+		return new Transaction(
+			moment(Date, "DD/MM/YYYY"),
+			From, To,
+			Narrative,
+			Amount
+		);
 	}
 
-	fromXML({ Description, Value, Parties, _Date }) {
-		this.date = moment.fromOADate(parseInt(_Date));
-		this.from = Parties.From;
-		this.to = Parties.To;
-		this.narrative = Description;
-		this.amount = Value;
+	static fromJSON({ Date, FromAccount, ToAccount, Narrative, Amount }) {
+		return new Transaction(
+			moment(Date, "YYYY-MM-DDThh:mm:ss"),
+			FromAccount, ToAccount,
+			Narrative,
+			Amount
+		);
+	}
+
+	static fromXML({ Description, Value, Parties, _Date }) {
+		return new Transaction(
+			moment.fromOADate(parseInt(_Date)),
+			Parties.From, Parties.To,
+			Description,
+			Value
+		);
 	}
 }

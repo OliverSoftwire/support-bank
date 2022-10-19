@@ -3,9 +3,11 @@ import path from "path";
 
 import readlineSync from "readline-sync";
 import log4js from "log4js";
+import moment from "moment";
 
 import Bank from "./src/Bank.js";
-import { isFile } from "./src/utils.js";
+import { isFile, capitaliseEachWord } from "./src/utils.js";
+import { Transaction } from "./src/Transaction.js";
 
 log4js.configure({
 	appenders: {
@@ -46,8 +48,8 @@ readlineSync.promptCLLoop({
 		console.log("save      - Saves all loaded transactions to a file (csv only)")
 		console.log("list      - Lists transactions for a user, or a summary of all accounts if 'all' is passed");
 		console.log("add       - Adds a new transaction (accounts that do not exist will be created)");
-		console.log("    Usage: add <YYYY-MM-DD|today> <from> <to> <reference> <amount>");
-		console.log("    Example: add 2022-10-01 \"Alice A\" \"Bob B\" Lunch 4.30");
+		console.log("    Usage: add <YYYY-MM-DD|today> <from> <to> <amount> [reference]");
+		console.log("    Example: add 2022-10-01 \"Alice A\" \"Bob B\" 15.99 \"Phone Charger\"");
 	},
 	exit: () => true,
 	quit: () => true,
@@ -62,7 +64,7 @@ readlineSync.promptCLLoop({
 			return;
 		}
 
-		const name = args.join(" ");
+		const name = capitaliseEachWord(args.join(" "));
 		if (!bank.accountExists(name)) {
 			console.log(`Account '${name}' does not exist`);
 			return;
@@ -86,6 +88,7 @@ readlineSync.promptCLLoop({
 		try {
 			bank.loadTransactions(filepath);
 		} catch (err) {
+			logger.error(err);
 			console.log("An error occured while loading the transactions file:");
 			console.log("    " + err.message);
 		}
@@ -112,11 +115,42 @@ readlineSync.promptCLLoop({
 		try {
 			bank.saveTransactions(filepath);
 		} catch (err) {
+			logger.error(err);
 			console.log("An error occured while saving transactions:");
 			console.log("    " + err.message);
 		}
 	},
-	add: (date, from, to, reference, amount) => {
-		//
+	add: (date, from, to, amount, reference = "") => {
+		if (!date) {
+			console.log("No date specified");
+			return;
+		}
+
+		if (!from) {
+			console.log("No origin account specified");
+			return;
+		}
+
+		if (!to) {
+			console.log("No destination account specified");
+			return;
+		}
+
+		if (!amount) {
+			console.log("No amount specified");
+			return;
+		}
+
+		date = date === "today" ? moment() : moment(date, "YYYY-MM-DD");
+		from = capitaliseEachWord(from);
+		to = capitaliseEachWord(to);
+
+		try {
+			bank.addTransaction(new Transaction(date, from, to, reference, amount));
+		} catch (err) {
+			logger.error(err);
+			console.log("An error occured while adding the transaction:");
+			console.log("    " + err.message);
+		}
 	}
 });

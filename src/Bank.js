@@ -97,13 +97,8 @@ export default class Bank {
 		this.accounts = {};
 	}
 
-	nameToId(name) {
-		return name.toLowerCase();
-	}
-
 	accountExists(name) {
-		const id = this.nameToId(name);
-		return this.accounts.hasOwnProperty(id);
+		return this.accounts.hasOwnProperty(name);
 	}
 
 	createAccount(name) {
@@ -111,7 +106,7 @@ export default class Bank {
 			throw new BankError(`Account '${this.getAccount(name).name}' already exists`);
 		}
 
-		return this.accounts[this.nameToId(name)] = new Account(name);
+		return this.accounts[name] = new Account(name);
 	}
 
 	getAccount(name) {
@@ -119,7 +114,7 @@ export default class Bank {
 			throw new BankError(`Account '${name}' does not exist`);
 		}
 
-		return this.accounts[this.nameToId(name)];
+		return this.accounts[name];
 	}
 
 	addTransaction(transaction) {
@@ -142,7 +137,7 @@ export default class Bank {
 
 		logger.info("Parsing transactions file");
 		const newTransactions = parseTransactionFile(transactionFileData, format).map(
-			(transaction, index) => new Transaction(transaction, index, format)
+			transaction => Transaction.fromData(transaction, format)
 		);
 
 		logger.info("Processing transactions");

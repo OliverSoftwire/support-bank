@@ -9,12 +9,10 @@ export class TransactionError extends Error {
 		this.index = index;
 		this.from = from;
 		this.to = to;
-
-		logger.error(this.toString());
 	}
 
 	toString() {
-		return `Transaction ${this.index} (${this.from} -> ${this.to}): ${this.message}`;
+		return `Transaction ${this.from} -> ${this.to}: ${this.message}`;
 	}
 }
 
@@ -23,8 +21,6 @@ export class AccountError extends Error {
 		super(message);
 
 		this.name = name;
-
-		logger.error(this.toString());
 	}
 
 	toString() {
@@ -35,7 +31,5 @@ export class AccountError extends Error {
 export class BankError extends Error {
 	constructor(message) {
 		super(message);
-
-		logger.error(this.toString());
 	}
 }
