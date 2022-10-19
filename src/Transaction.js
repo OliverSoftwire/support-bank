@@ -16,6 +16,9 @@ export class Transaction {
 	constructor(date, from, to, narrative, amount) {
 		logger.debug(`Creating new transaction ${from} -> ${to}`);
 
+		this.from = from;
+		this.to = to;
+
 		if (!moment.isMoment(date)) {
 			throw new TransactionError(this, "Transaction date is not a Moment");
 		}
@@ -31,8 +34,6 @@ export class Transaction {
 		}
 
 		this.date = date;
-		this.from = from;
-		this.to = to;
 		this.narrative = narrative;
 	}
 
