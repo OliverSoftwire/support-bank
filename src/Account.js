@@ -40,7 +40,7 @@ export default class Account {
 	toString() {
 		const table = new Table({
 			title: `${this.name} | Balance: ${formatBalance(this.balance)}`,
-			enabledColumns: ["date-formatted", "Payee", "Reference", "Debit", "Credit"],
+			enabledColumns: ["date-formatted", "To/From", "Reference", "Debit", "Credit"],
 			sort: (row1, row2) => row1.date.valueOf() - row2.date.valueOf(),
 			computedColumns: [
 				{
