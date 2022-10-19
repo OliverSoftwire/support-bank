@@ -41,10 +41,13 @@ console.log("Use 'help' to see available commands");
 
 readlineSync.promptCLLoop({
 	help: () => {
+		console.log("exit|quit - exit the prompt");
 		console.log("load      - Loads transactions from a file (supports csv, json and xml)");
 		console.log("save      - Saves all loaded transactions to a file (csv only)")
 		console.log("list      - Lists transactions for a user, or a summary of all accounts if 'all' is passed");
-		console.log("exit|quit - exit the prompt");
+		console.log("add       - Adds a new transaction (accounts that do not exist will be created)");
+		console.log("    Usage: add <YYYY-MM-DD|today> <from> <to> <reference> <amount>");
+		console.log("    Example: add 2022-10-01 \"Alice A\" \"Bob B\" Lunch 4.30");
 	},
 	exit: () => true,
 	quit: () => true,
@@ -112,5 +115,8 @@ readlineSync.promptCLLoop({
 			console.log("An error occured while saving transactions:");
 			console.log("    " + err.message);
 		}
+	},
+	add: (date, from, to, reference, amount) => {
+		//
 	}
 });

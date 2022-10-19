@@ -111,7 +111,7 @@ export default class Bank {
 			throw new BankError(`Account '${this.getAccount(name).name}' already exists`);
 		}
 
-		this.accounts[this.nameToId(name)] = new Account(name);
+		return this.accounts[this.nameToId(name)] = new Account(name);
 	}
 
 	getAccount(name) {
@@ -120,6 +120,18 @@ export default class Bank {
 		}
 
 		return this.accounts[this.nameToId(name)];
+	}
+
+	addTransaction(transaction) {
+		logger.debug("Adding transaction");
+
+		const from = this.accountExists(transaction.from) ? this.getAccount(transaction.from) : this.createAccount(transaction.from);
+		const to   = this.accountExists(transaction.to)   ? this.getAccount(transaction.to)   : this.createAccount(transaction.to);
+
+		from.processTransaction(transaction);
+		to.processTransaction(transaction);
+
+		this.transactions.push(transaction);
 	}
 
 	loadTransactions(filepath) {
@@ -133,25 +145,8 @@ export default class Bank {
 			(transaction, index) => new Transaction(transaction, index, format)
 		);
 
-		this.transactions = this.transactions.concat(newTransactions);
-
-		logger.info("Extracting unique names");
-		const names = this.transactions
-			.map(({ from }) => from)
-			.concat(this.transactions.map(({ to }) => to));
-
-		logger.info("Creating accounts");
-		lodash.uniq(names).forEach(name => {
-			if (!this.accountExists(name)) {
-				this.createAccount(name);
-			}
-		});
-
 		logger.info("Processing transactions");
-		newTransactions.forEach(transaction => {
-			this.getAccount(transaction.from).processTransaction(transaction);
-			this.getAccount(transaction.to).processTransaction(transaction);
-		});
+		newTransactions.forEach(transaction => this.addTransaction(transaction));
 	}
 
 	saveTransactions(filepath) {
