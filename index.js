@@ -78,11 +78,6 @@ readlineSync.promptCLLoop({
 			return;
 		}
 
-		if (!isFile(filepath)) {
-			console.log("Specified path is not a file");
-			return;
-		}
-
 		console.log(`Loading transactions from ${path.resolve(filepath)}...`);
 
 		try {

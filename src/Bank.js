@@ -37,15 +37,10 @@ function transactionFormatFromPath(filepath) {
 }
 
 function readTransactionsFile(path) {
-	if (!fs.existsSync(path)) {
-		throw new BankError(`File ${path} does not exist`);
-	}
-
 	try {
 		return fs.readFileSync(path);
 	} catch (err) {
-		logger.error(err);
-		throw new BankError("Failed to read transactions file (check the log for details)");
+		throw new BankError(err.message);
 	}
 }
 
