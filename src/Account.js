@@ -67,6 +67,8 @@ export default class Account {
 			]
 		});
 
+		// console-table-printer saves the retvals from computed column functions to the objects before rendering
+		// need to copy here otherwise all subsequent renders would have both the computed columns **and** the previous results
 		table.addRows(Object.values(this.transactions).map(transaction => lodash.clone(transaction)));
 		return table.render();
 	}
