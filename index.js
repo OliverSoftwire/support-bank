@@ -4,6 +4,7 @@ import path from "path";
 import fs from "fs";
 
 import Bank from "./src/Bank.js";
+import { isFile } from "./src/utils.js";
 
 log4js.configure({
 	appenders: {
@@ -71,6 +72,11 @@ readlineSync.promptCLLoop({
 			return;
 		}
 
+		if (!isFile(filepath)) {
+			console.log("Specified path is not a file");
+			return;
+		}
+
 		console.log(`Loading transactions from ${path.resolve(filepath)}...`);
 
 		try {
@@ -86,11 +92,15 @@ readlineSync.promptCLLoop({
 			return;
 		}
 
-		if (
-			fs.existsSync(filepath) &&
-			!readlineSync.keyInYNStrict("File already exists, do you want to overwrite?")
-		) {
-			return;
+		if (fs.existsSync(filepath)) {
+			if (!isFile(filepath)) {
+				console.log("Cannot overwrite path, target is not a file");
+				return;
+			}
+
+			if (!readlineSync.keyInYNStrict("File already exists, do you want to overwrite?")) {
+				return;
+			}
 		}
 
 		console.log(`Saving transactions to ${path.resolve(filepath)}...`);
