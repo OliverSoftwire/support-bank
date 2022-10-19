@@ -10,7 +10,7 @@ export class TransactionError extends Error {
 		this.from = from;
 		this.to = to;
 
-		logger.error(this.toString());
+		logger.error(this);
 	}
 
 	toString() {
@@ -24,7 +24,7 @@ export class AccountError extends Error {
 
 		this.name = name;
 
-		logger.error(this.toString());
+		logger.error(this);
 	}
 
 	toString() {
@@ -36,6 +36,6 @@ export class BankError extends Error {
 	constructor(message) {
 		super(message);
 
-		logger.error(this.toString());
+		logger.error(this);
 	}
 }
