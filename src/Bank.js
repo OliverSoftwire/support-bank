@@ -7,6 +7,8 @@ import log4js from "log4js";
 import { parse } from "csv-parse/sync";
 import { stringify } from "csv-stringify/sync";
 
+import Fuse from "fuse.js";
+
 import { XMLParser } from "fast-xml-parser";
 
 import { Table } from "console-table-printer";
@@ -90,6 +92,11 @@ export default class Bank {
 	constructor() {
 		this.transactions = [];
 		this.accounts = {};
+
+		this.accountSearcher = new Fuse([], {
+			isCaseSensitive: true,
+			keys: ["name"]
+		});
 	}
 
 	accountExists(name) {
@@ -101,7 +108,11 @@ export default class Bank {
 			throw new BankError(`Account '${this.getAccount(name).name}' already exists`);
 		}
 
-		return this.accounts[name] = new Account(name);
+		const account = new Account(name);
+		this.accountSearcher.add(account)
+		this.accounts[name] = account;
+
+		return account;
 	}
 
 	getAccount(name) {
@@ -110,6 +121,11 @@ export default class Bank {
 		}
 
 		return this.accounts[name];
+	}
+
+	findAccount(query) {
+		const results = this.accountSearcher.search(query);
+		return results[0] ? results[0].item : undefined;
 	}
 
 	addTransaction(transaction) {

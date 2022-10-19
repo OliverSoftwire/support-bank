@@ -38,6 +38,19 @@ logger.info("Support Bank started");
 
 const bank = new Bank();
 
+function createAccounIfNeeded(name) {
+	const account = bank.findAccount(name);
+	if (account) {
+		return account;
+	}
+
+	if (readlineSync.keyInYNStrict(`Account '${name}' does not exist, do you want to create it?`)) {
+		return bank.createAccount(name);
+	}
+
+	return undefined;
+}
+
 console.log("Welcome to Support Bank");
 console.log("Use 'help' to see available commands");
 
@@ -65,12 +78,13 @@ readlineSync.promptCLLoop({
 		}
 
 		const name = args.join(" ");
-		if (!bank.accountExists(name)) {
+		const account = bank.findAccount(name);
+		if (!account) {
 			console.log(`Account '${name}' does not exist`);
 			return;
 		}
 
-		console.log(bank.getAccount(name).toString());
+		console.log(account.toString());
 	},
 	load: (filepath) => {
 		if (!filepath) {
@@ -142,12 +156,25 @@ readlineSync.promptCLLoop({
 			return;
 		}
 
+		let fromAcc = createAccounIfNeeded(from);
+		if (!fromAcc) {
+			return;
+		}
+
+		let toAcc = createAccounIfNeeded(to);
+		if (!toAcc) {
+			return;
+		}
+
 		try {
-			bank.addTransaction(new Transaction(date, from, to, reference, amount));
+			bank.addTransaction(new Transaction(date, fromAcc.name, toAcc.name, reference, amount));
 		} catch (err) {
 			logger.error(err);
 			console.log("An error occured while adding the transaction:");
 			console.log("    " + err.message);
+			return;
 		}
+
+		console.log("Transaction added");
 	}
 });
