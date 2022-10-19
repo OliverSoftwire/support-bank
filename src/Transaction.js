@@ -14,7 +14,7 @@ export const TransactionFormat = {
 
 export class Transaction {
 	constructor(transaction, index, format) {
-		logger.debug(`Creating new transaction`);
+		logger.debug(`Creating new transaction from row ${index} (${transaction.From} -> ${transaction.To})`);
 
 		this.index = index;
 		this.format = format;
